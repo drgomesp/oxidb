@@ -1,0 +1,10 @@
+[package]
+name = "oxidb"
+version = "0.1.0"
+authors = ["Daniel Ribeiro <daniel.ribeiro@resultadosdigitais.com.br>"]
+edition = "2018"
+
+[dependencies]
+log = "*"
+simplelog = "*"
+failure = "*"

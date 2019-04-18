@@ -7,4 +7,6 @@ edition = "2018"
 [dependencies]
 log = "*"
 simplelog = "*"
+byteorder = "*"
 failure = "*"
+prettytable-rs = "*"

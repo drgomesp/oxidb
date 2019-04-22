@@ -54,8 +54,8 @@ impl Statement {
                 for row in table.iter() {
                     let mut tcv = vec![];
 
-                    for cv in row.iter() {
-                        tcv.push(Cell::new(format!("{}", cv).as_str()));
+                    for (c, cv) in table.columns.iter().zip(row.iter()) {
+                        tcv.push(Cell::new(format!("{:?}", cv).as_str()));
                     }
 
                     t.add_row(Row::new(tcv));
@@ -127,13 +127,13 @@ fn main() {
         Column {
             offset: 1,
             name: "first_name".into(),
-            value_type: db::DataType::String { len: 4 },
+            value_type: db::DataType::String { length: 16 },
             nullable: true,
         },
         Column {
             offset: 2,
             name: "last_name".into(),
-            value_type: db::DataType::String { len: 4 },
+            value_type: db::DataType::String { length: 16 },
             nullable: true,
         },
     ];

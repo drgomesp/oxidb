@@ -19,7 +19,6 @@ pub enum ColumnValue {
 
 #[derive(Clone, Debug)]
 pub struct Column {
-    pub offset: u32,
     pub name: String,
     pub value_type: DataType,
     pub nullable: bool,
@@ -54,10 +53,8 @@ impl ColumnValueOps for ColumnValue {
                     ColumnValue::UnsignedInteger(LittleEndian::read_u64(&bytes))
                 }
             }),
-            DataType::String { length } => {
+            DataType::String(length) => {
                 let len = *length;
-
-                debug!("len={}", len);
 
                 if len > 0 {
                     let s = String::from_utf8_lossy(&bytes[0..len]);
@@ -71,19 +68,11 @@ impl ColumnValueOps for ColumnValue {
 
     fn to_bytes(&self, column_type: &Self::ColumnType) -> Result<Box<[u8]>, Error> {
         match (&self, column_type) {
-            (ColumnValue::StringLiteral(ref s), DataType::String { length }) => {
+            (ColumnValue::StringLiteral(ref s), DataType::String(length)) => {
                 let mut buf = s.to_owned().into_bytes();
-                let remaining = vec![0u8; length - s.len()];
+                let remaining = vec![0u8; *length - s.len()];
 
                 buf.extend_from_slice(remaining.as_slice());
-
-                debug!(
-                    "length={}, s.len={} remaining={:?}, buf={:?}",
-                    *length,
-                    s.len(),
-                    remaining,
-                    buf
-                );
 
                 Ok(buf.into_boxed_slice())
             }
@@ -98,10 +87,6 @@ impl ColumnValueOps for ColumnValue {
 }
 
 impl ColumnOps for Column {
-    fn get_offset(&self) -> u32 {
-        self.offset
-    }
-
     fn get_name(&self) -> &str {
         self.name.as_str()
     }
@@ -152,7 +137,7 @@ where
     values
         .map(|value| match value {
             ColumnValue::StringLiteral(ref s) => {
-                value.to_bytes(&DataType::String { length: 16 }).unwrap()
+                value.to_bytes(&DataType::String(s.len())).unwrap()
             }
             ColumnValue::SignedInteger(..) => value
                 .to_bytes(&DataType::Integer {
@@ -230,8 +215,6 @@ impl<'a> Page<'a> {
 
             row_num += 1;
 
-            debug!("page={:#?}", self);
-
             Cow::from(row)
         }))
     }
@@ -250,7 +233,13 @@ impl<'a> Page<'a> {
                 None => unimplemented!(),
             }
 
+            let column_length = column.get_data_type().get_fixed_length().expect("wtf");
+            assert!(data_box.len() <= column_length, "data overflows max length");
+
+            let remaining = vec![0u8; column_length - data_box.len()];
+
             data.extend_from_slice(&data_box);
+            data.extend_from_slice(&remaining);
             self.data.extend_from_slice(&data);
         }
 

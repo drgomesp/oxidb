@@ -3,14 +3,14 @@ use std::borrow::Cow;
 
 #[derive(Clone, Debug)]
 pub enum DataType {
-    String { length: usize },
+    String(usize),
     Integer { signed: bool, bytes: u8 },
 }
 
 impl DataType {
     pub fn get_fixed_length(&self) -> Option<usize> {
         match self {
-            DataType::String { length } => Some(*length),
+            DataType::String(length) => Some(*length),
             DataType::Integer { bytes, .. } => Some(*bytes as usize),
         }
     }
@@ -24,7 +24,6 @@ pub trait ColumnValueOps: Sized {
 }
 
 pub trait ColumnOps: Sized {
-    fn get_offset(&self) -> u32;
     fn get_name(&self) -> &str;
     fn get_data_type(&self) -> &DataType;
 }

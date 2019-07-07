@@ -6,12 +6,12 @@ extern crate failure;
 extern crate log;
 
 mod db;
-mod paged_db;
+mod simple_db;
 
 use db::TableOps;
 use log::LevelFilter;
-use paged_db::{Column, ColumnValue, Table};
 use prettytable::{Cell, Row};
+use simple_db::{Column, ColumnValue, Table};
 use simplelog::{CombinedLogger, Config, TermLogger};
 use std::io::{stdin, stdout, Write};
 use std::str::FromStr;
@@ -116,8 +116,7 @@ fn main() {
 
     let columns = vec![
         Column {
-            offset: 0,
-            name: "id".into(),
+            name: String::from("id"),
             value_type: db::DataType::Integer {
                 bytes: 8,
                 signed: false,
@@ -125,20 +124,18 @@ fn main() {
             nullable: true,
         },
         Column {
-            offset: 1,
-            name: "first_name".into(),
-            value_type: db::DataType::String { length: 16 },
+            name: String::from("first_name"),
+            value_type: db::DataType::String(8),
             nullable: true,
         },
         Column {
-            offset: 2,
-            name: "last_name".into(),
-            value_type: db::DataType::String { length: 16 },
+            name: String::from("last_name"),
+            value_type: db::DataType::String(8),
             nullable: true,
         },
     ];
 
-    let mut table = Table::new("users".into(), &columns);
+    let mut table = Table::new(String::from("users"), &columns);
 
     loop {
         print!("oxidb> ");

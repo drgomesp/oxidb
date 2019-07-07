@@ -121,7 +121,7 @@ impl<'a> TableOps<'a> for Table<'a> {
         T: Iterator<Item = Self::ColumnValue>,
     {
         let boxed_page = &mut self.pages[0];
-        boxed_page.insert(build_column_data(self.columns, column_data).iter())?;
+        boxed_page.insert(build_row_data(self.columns, column_data).iter())?;
 
         self.num_rows += 1;
 
@@ -129,7 +129,7 @@ impl<'a> TableOps<'a> for Table<'a> {
     }
 }
 
-fn build_column_data<I>(columns: &[Column], values: I) -> Vec<Box<[u8]>>
+fn build_row_data<I>(columns: &[Column], values: I) -> Vec<Box<[u8]>>
 where
     I: ExactSizeIterator,
     I: Iterator<Item = ColumnValue>,

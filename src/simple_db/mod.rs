@@ -1,7 +1,7 @@
 use crate::{
     db::{ColumnInfo, TableOps},
     storage::{page::Page, PageOps},
-    types::{column_value::ColumnValue, DataType},
+    types::{ColumnValue, DataType},
 };
 use failure::Error;
 use std::borrow::Cow;

@@ -1,9 +1,23 @@
 use crate::db::ColumnValueOps;
-use crate::types::DataType;
 use byteorder::{ByteOrder, LittleEndian};
 use failure::Error;
 use std::borrow::Cow;
-use std::*;
+use std::fmt;
+
+#[derive(Clone, Debug)]
+pub enum DataType {
+    String(usize),
+    Integer { signed: bool, bytes: u8 },
+}
+
+impl DataType {
+    pub fn get_fixed_length(&self) -> Option<usize> {
+        match self {
+            DataType::String(length) => Some(*length),
+            DataType::Integer { bytes, .. } => Some(*bytes as usize),
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub(crate) enum ColumnValue {
@@ -81,7 +95,7 @@ impl ColumnValueOps for ColumnValue {
                 LittleEndian::write_i64(&mut buf, *i);
                 Ok(buf.to_owned().into_boxed_slice())
             }
-            _ => unimplemented!("{:#?}, {:#?}", &self, column_type),
+            _ => unimplemented!(),
         }
     }
 }

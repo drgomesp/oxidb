@@ -1,7 +1,7 @@
 use crate::{
     db::{ColumnInfo, ColumnValueOps},
     storage::{PageInfo, PageOps},
-    types::{column_value::ColumnValue, DataType},
+    types::{ColumnValue, DataType},
 };
 use failure::Error;
 use log::debug;

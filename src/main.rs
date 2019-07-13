@@ -13,7 +13,7 @@ mod storage;
 mod types;
 
 use crate::db::ColumnInfo;
-use crate::types::{column_value::ColumnValue, DataType};
+use crate::types::{ColumnValue, DataType};
 use db::TableOps;
 use log::LevelFilter;
 use prettytable::{Cell, Row};

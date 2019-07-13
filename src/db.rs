@@ -29,11 +29,23 @@ pub trait ColumnOps: Sized {
 }
 
 pub trait TableOps<'a> {
-    type ColumnValue: 'a + Clone;
+    type ColumnValue: ColumnValueOps;
+
+    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
+    where
+        [<Self as TableOps<'a>>::ColumnValue]: std::borrow::ToOwned;
+
+    fn insert<T>(&mut self, row: T) -> Result<(), Error>
+    where
+        T: ExactSizeIterator,
+        T: Iterator<Item = Self::ColumnValue>;
+}
+
+pub trait PageOps {
+    type ColumnValue: Clone;
 
     fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>;
-
-    fn insert<T>(&mut self, column_data: T) -> Result<(), Error>
+    fn insert<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>;

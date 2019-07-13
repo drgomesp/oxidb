@@ -12,6 +12,7 @@ mod simple_db;
 mod storage;
 mod types;
 
+use crate::db::ColumnInfo;
 use crate::types::{column_value::ColumnValue, DataType};
 use db::TableOps;
 use log::LevelFilter;
@@ -110,8 +111,8 @@ fn main() {
     ])
     .unwrap();
 
-    let columns = vec![
-        Column::new(
+    let columns: Vec<Box<dyn ColumnInfo>> = vec![
+        box Column::new(
             String::from("id"),
             DataType::Integer {
                 bytes: 8,
@@ -119,8 +120,8 @@ fn main() {
             },
             true,
         ),
-        Column::new(String::from("first_name"), DataType::String(8), true),
-        Column::new(String::from("last_name"), DataType::String(8), true),
+        box Column::new(String::from("first_name"), DataType::String(8), true),
+        box Column::new(String::from("last_name"), DataType::String(8), true),
     ];
 
     let mut table = Table::new(String::from("users"), &columns);

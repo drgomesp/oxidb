@@ -1,5 +1,5 @@
 use crate::{
-    db::{ColumnOps, PageOps, TableOps},
+    db::{ColumnInfo, PageOps, TableOps},
     storage::page::Page,
     types::{column_value::ColumnValue, DataType},
 };
@@ -11,7 +11,7 @@ pub(crate) const MAX_PAGES: u8 = 100;
 #[derive(Clone, Debug)]
 pub(crate) struct Column {
     pub name: String,
-    pub value_type: DataType,
+    pub data_type: DataType,
     pub nullable: bool,
 }
 
@@ -19,36 +19,36 @@ impl Column {
     pub fn new(name: String, value_type: DataType, nullable: bool) -> Self {
         Self {
             name,
-            value_type,
+            data_type: value_type,
             nullable,
         }
+    }
+}
+
+impl ColumnInfo for Column {
+    fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    fn get_data_type(&self) -> &DataType {
+        &self.data_type
     }
 }
 
 #[derive(Debug)]
 pub(crate) struct Table<'a> {
     name: String,
-    pub columns: &'a [Column],
+    pub columns: &'a [Box<dyn ColumnInfo>],
     pages: Box<[Page<'a>]>,
     num_rows: u64,
 }
 
-impl ColumnOps for Column {
-    fn get_name(&self) -> &str {
-        self.name.as_str()
-    }
-
-    fn get_data_type(&self) -> &DataType {
-        &self.value_type
-    }
-}
-
 impl<'a> Table<'a> {
-    pub fn new(name: String, columns: &'a [Column]) -> Self {
+    pub fn new(name: String, columns: &'a [Box<dyn ColumnInfo>]) -> Self {
         Self {
             name,
             columns,
-            pages: vec![Page::new(columns); MAX_PAGES as usize].into_boxed_slice(),
+            pages: vec![Page::new(&columns); MAX_PAGES as usize].into_boxed_slice(),
             num_rows: 0,
         }
     }

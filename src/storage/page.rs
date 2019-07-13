@@ -1,6 +1,5 @@
 use crate::{
-    db::{ColumnOps, ColumnValueOps, PageInfo, PageOps},
-    simple_db::Column,
+    db::{ColumnInfo, ColumnValueOps, PageInfo, PageOps},
     types::{column_value::ColumnValue, DataType},
 };
 use failure::Error;
@@ -32,13 +31,13 @@ pub(crate) struct PageHeader {
 #[derive(Clone, Debug)]
 pub(crate) struct Page<'a> {
     pub header: PageHeader,
+    columns: &'a [Box<dyn ColumnInfo>],
     offsets: Vec<RowPointer>,
     data: Vec<u8>,
-    columns: &'a [Column],
 }
 
 impl<'a> Page<'a> {
-    pub fn new(columns: &'a [Column]) -> Self {
+    pub fn new(columns: &'a [Box<dyn ColumnInfo>]) -> Self {
         Self {
             header: PageHeader {
                 page_size: PAGE_SIZE,
@@ -46,9 +45,9 @@ impl<'a> Page<'a> {
                 flags: PageFlags::default(),
                 free_space: PAGE_SIZE - PAGE_HEADER_SIZE,
             },
+            columns,
             offsets: vec![],
             data: vec![],
-            columns,
         }
     }
 }
@@ -140,6 +139,30 @@ impl<'a> PageOps for Page<'a> {
 
 #[cfg(test)]
 mod tests {
+    #[derive(Debug)]
+    struct Column {
+        pub name: String,
+        pub data_type: DataType,
+    }
+
+    impl Column {
+        pub fn new(name: String, value_type: DataType) -> Self {
+            Self {
+                name,
+                data_type: value_type,
+            }
+        }
+    }
+
+    impl ColumnInfo for Column {
+        fn get_name(&self) -> &str {
+            self.name.as_str()
+        }
+        fn get_data_type(&self) -> &DataType {
+            &self.data_type
+        }
+    }
+
     use super::*;
     use DataType;
 
@@ -154,24 +177,22 @@ mod tests {
 
     #[test]
     fn test_page_insert() {
-        let columns = vec![
-            Column::new(
+        let columns: Vec<Box<dyn ColumnInfo>> = vec![
+            box Column::new(
                 "uint".to_string(),
                 DataType::Integer {
                     bytes: 8,
                     signed: false,
                 },
-                true,
             ),
-            Column::new(
+            box Column::new(
                 "int".to_string(),
                 DataType::Integer {
                     bytes: 8,
                     signed: true,
                 },
-                true,
             ),
-            Column::new("string".to_string(), DataType::String(8), true),
+            box Column::new("string".to_string(), DataType::String(8)),
         ];
 
         let mut page = Page::new(&columns);

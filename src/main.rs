@@ -10,12 +10,13 @@ extern crate log;
 mod db;
 mod simple_db;
 mod storage;
+mod types;
 
-use crate::db::DataType;
+use crate::types::{column_value::ColumnValue, DataType};
 use db::TableOps;
 use log::LevelFilter;
 use prettytable::{Cell, Row};
-use simple_db::{Column, ColumnValue, Table};
+use simple_db::{Column, Table};
 use simplelog::{CombinedLogger, Config, TermLogger};
 use std::{
     io::{stdin, stdout, Write},

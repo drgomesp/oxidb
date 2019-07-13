@@ -1,6 +1,8 @@
-use crate::db::{ColumnOps, ColumnValueOps, PageOps};
-use crate::simple_db::Column;
-use crate::ColumnValue;
+use crate::{
+    db::{ColumnOps, ColumnValueOps, PageInfo, PageOps},
+    simple_db::Column,
+    types::{column_value::ColumnValue, DataType},
+};
 use failure::Error;
 use log::debug;
 use std::borrow::Cow;
@@ -48,6 +50,20 @@ impl<'a> Page<'a> {
             data: vec![],
             columns,
         }
+    }
+}
+
+impl<'a> PageInfo for Page<'a> {
+    fn get_free_space(&self) -> usize {
+        self.header.free_space
+    }
+
+    fn get_page_size(&self) -> usize {
+        self.header.page_size
+    }
+
+    fn get_row_count(&self) -> usize {
+        self.header.row_count
     }
 }
 
@@ -125,7 +141,7 @@ impl<'a> PageOps for Page<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::db::DataType;
+    use DataType;
 
     #[test]
     fn test_page_default() {

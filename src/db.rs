@@ -1,20 +1,6 @@
+use crate::types::DataType;
 use failure::Error;
 use std::borrow::Cow;
-
-#[derive(Clone, Debug)]
-pub enum DataType {
-    String(usize),
-    Integer { signed: bool, bytes: u8 },
-}
-
-impl DataType {
-    pub fn get_fixed_length(&self) -> Option<usize> {
-        match self {
-            DataType::String(length) => Some(*length),
-            DataType::Integer { bytes, .. } => Some(*bytes as usize),
-        }
-    }
-}
 
 pub trait ColumnValueOps: Sized {
     type ColumnType;
@@ -39,6 +25,12 @@ pub trait TableOps<'a> {
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>;
+}
+
+pub trait PageInfo {
+    fn get_free_space(&self) -> usize;
+    fn get_page_size(&self) -> usize;
+    fn get_row_count(&self) -> usize;
 }
 
 pub trait PageOps {

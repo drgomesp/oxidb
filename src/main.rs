@@ -2,19 +2,25 @@
 
 #[macro_use]
 extern crate prettytable;
+#[macro_use]
+extern crate bitflags;
 extern crate failure;
 extern crate log;
 
 mod db;
 mod simple_db;
+mod storage;
 
+use crate::db::DataType;
 use db::TableOps;
 use log::LevelFilter;
 use prettytable::{Cell, Row};
 use simple_db::{Column, ColumnValue, Table};
 use simplelog::{CombinedLogger, Config, TermLogger};
-use std::io::{stdin, stdout, Write};
-use std::str::FromStr;
+use std::{
+    io::{stdin, stdout, Write},
+    str::FromStr,
+};
 
 #[derive(Debug)]
 enum StatementType {
@@ -33,37 +39,26 @@ impl Statement {
         match self.stmt_type {
             StatementType::Insert => {
                 for row in &self.new_rows {
-                    table.insert(row.clone().into_iter()).unwrap();
+                    table.insert(row.into_iter().cloned())?;
                 }
 
                 Ok(())
             }
             StatementType::Select => {
-                for row in table.iter() {
-                    for cv in row.iter() {
-                        print!("{}", cv);
-                    }
-
-                    println!()
-                }
-
-                // Create the table
                 let mut t = prettytable::Table::new();
                 t.set_titles(row![cell!("ID"), cell!("FIRST NAME"), cell!("LAST NAME")]);
 
                 for row in table.iter() {
                     let mut tcv = vec![];
 
-                    for (c, cv) in table.columns.iter().zip(row.iter()) {
+                    for (_, cv) in table.columns.iter().zip(row.iter()) {
                         tcv.push(Cell::new(format!("{:?}", cv).as_str()));
                     }
 
                     t.add_row(Row::new(tcv));
                 }
 
-                // Print the table to stdout
                 t.printstd();
-
                 Ok(())
             }
         }
@@ -93,7 +88,7 @@ fn prepare_statement<'a>(
     input: String,
 ) -> Result<Statement, failure::Error> {
     let column_values: Vec<&str> = input.split(' ').collect();
-    let mut row = Vec::new();
+    let mut row = vec![];
 
     for cv in column_values {
         match cv.parse::<u64>() {
@@ -115,24 +110,16 @@ fn main() {
     .unwrap();
 
     let columns = vec![
-        Column {
-            name: String::from("id"),
-            value_type: db::DataType::Integer {
+        Column::new(
+            String::from("id"),
+            DataType::Integer {
                 bytes: 8,
                 signed: false,
             },
-            nullable: true,
-        },
-        Column {
-            name: String::from("first_name"),
-            value_type: db::DataType::String(8),
-            nullable: true,
-        },
-        Column {
-            name: String::from("last_name"),
-            value_type: db::DataType::String(8),
-            nullable: true,
-        },
+            true,
+        ),
+        Column::new(String::from("first_name"), DataType::String(8), true),
+        Column::new(String::from("last_name"), DataType::String(8), true),
     ];
 
     let mut table = Table::new(String::from("users"), &columns);

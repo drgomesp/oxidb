@@ -1,31 +1,40 @@
-mod page;
-
-use crate::db::{ColumnOps, ColumnValueOps, DataType, TableOps};
+use crate::{
+    db::{ColumnOps, ColumnValueOps, DataType, PageOps, TableOps},
+    storage::page::Page,
+};
 use byteorder::{ByteOrder, LittleEndian};
 use failure::Error;
-use log::debug;
-use page::*;
 use std::borrow::Cow;
 use std::fmt;
-use std::mem;
 
-pub const MAX_PAGES: u8 = 100;
+pub(crate) const MAX_PAGES: u8 = 100;
 
 #[derive(Clone, Debug)]
-pub enum ColumnValue {
+pub(crate) enum ColumnValue {
     StringLiteral(String),
     UnsignedInteger(u64),
     SignedInteger(i64),
 }
 
 #[derive(Clone, Debug)]
-pub struct Column {
+pub(crate) struct Column {
     pub name: String,
     pub value_type: DataType,
     pub nullable: bool,
 }
+
+impl Column {
+    pub fn new(name: String, value_type: DataType, nullable: bool) -> Self {
+        Self {
+            name,
+            value_type,
+            nullable,
+        }
+    }
+}
+
 #[derive(Debug)]
-pub struct Table<'a> {
+pub(crate) struct Table<'a> {
     name: String,
     pub columns: &'a [Column],
     pages: Box<[Page<'a>]>,
@@ -70,6 +79,8 @@ impl ColumnValueOps for ColumnValue {
     fn to_bytes(&self, column_type: &Self::ColumnType) -> Result<Box<[u8]>, Error> {
         match (&self, column_type) {
             (ColumnValue::StringLiteral(ref s), DataType::String(length)) => {
+                assert!(*length >= s.len());
+
                 let mut buf = s.to_owned().into_bytes();
                 let remaining = vec![0u8; *length - s.len()];
 
@@ -77,12 +88,29 @@ impl ColumnValueOps for ColumnValue {
 
                 Ok(buf.into_boxed_slice())
             }
-            (ColumnValue::UnsignedInteger(i), DataType::Integer { bytes: n, .. }) => {
+            (
+                ColumnValue::UnsignedInteger(i),
+                DataType::Integer {
+                    signed: false,
+                    bytes: n,
+                },
+            ) => {
                 let mut buf = vec![0u8; *n as usize];
                 LittleEndian::write_u64(&mut buf, *i);
                 Ok(buf.to_owned().into_boxed_slice())
             }
-            _ => unimplemented!(),
+            (
+                ColumnValue::SignedInteger(i),
+                DataType::Integer {
+                    signed: true,
+                    bytes: n,
+                },
+            ) => {
+                let mut buf = vec![0u8; *n as usize];
+                LittleEndian::write_i64(&mut buf, *i);
+                Ok(buf.to_owned().into_boxed_slice())
+            }
+            _ => unimplemented!("{:#?}, {:#?}", &self, column_type),
         }
     }
 }
@@ -111,7 +139,10 @@ impl<'a> Table<'a> {
 impl<'a> TableOps<'a> for Table<'a> {
     type ColumnValue = ColumnValue;
 
-    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b> {
+    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
+    where
+        [<Self as TableOps<'a>>::ColumnValue]: std::borrow::ToOwned,
+    {
         self.pages[0].iter()
     }
 
@@ -121,7 +152,7 @@ impl<'a> TableOps<'a> for Table<'a> {
         T: Iterator<Item = Self::ColumnValue>,
     {
         let boxed_page = &mut self.pages[0];
-        boxed_page.insert(build_row_data(self.columns, column_data).iter())?;
+        boxed_page.insert(column_data)?;
 
         self.num_rows += 1;
 
@@ -129,13 +160,13 @@ impl<'a> TableOps<'a> for Table<'a> {
     }
 }
 
-fn build_row_data<I>(columns: &[Column], values: I) -> Vec<Box<[u8]>>
+fn build_row_data<I>(values: I) -> Vec<Box<[u8]>>
 where
     I: ExactSizeIterator,
     I: Iterator<Item = ColumnValue>,
 {
     values
-        .map(|value| match value {
+        .map(|ref value| match value {
             ColumnValue::StringLiteral(ref s) => {
                 value.to_bytes(&DataType::String(s.len())).unwrap()
             }

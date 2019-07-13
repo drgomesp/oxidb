@@ -1,8 +1,8 @@
-use crate::{PageInfo, PageOps};
+use crate::babylon::{PageInfo, PageOps};
 use failure::Error;
 use log::debug;
-use oxidb_core::types::ColumnValue;
-use oxidb_core::{ColumnInfo, ColumnValueOps};
+use oxidb_core::types::DataType;
+use oxidb_core::{types::ColumnValue, ColumnInfo, ColumnValueOps};
 use std::borrow::Cow;
 use std::mem;
 
@@ -163,7 +163,7 @@ mod tests {
     }
 
     use super::*;
-    use DataType;
+    use oxidb_core::types::DataType;
 
     #[test]
     fn test_page_default() {

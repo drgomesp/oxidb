@@ -1,9 +1,12 @@
 use failure::Error;
 use oxidb_core::{
     types::{ColumnValue, DataType},
-    ColumnInfo, TableOps,
+    ColumnInfo,
 };
-use oxidb_storage::{babylon::page::Page, PageOps};
+use oxidb_storage::{
+    babylon::{page::Page, PageOps},
+    StorageOps,
+};
 use std::borrow::Cow;
 
 pub(crate) const MAX_PAGES: u8 = 100;
@@ -54,17 +57,17 @@ impl<'a> Table<'a> {
     }
 }
 
-impl<'a> TableOps<'a> for Table<'a> {
+impl<'a> StorageOps<'a> for Table<'a> {
     type ColumnValue = ColumnValue;
 
     fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
     where
-        [<Self as TableOps<'a>>::ColumnValue]: std::borrow::ToOwned,
+        [<Self as StorageOps<'a>>::ColumnValue]: std::borrow::ToOwned,
     {
         self.pages[0].iter()
     }
 
-    fn insert<T>(&mut self, column_data: T) -> Result<(), Error>
+    fn insert_row<T>(&mut self, column_data: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>,

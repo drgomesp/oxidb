@@ -2,7 +2,6 @@
 
 #[macro_use]
 extern crate prettytable;
-#[macro_use]
 extern crate bitflags;
 extern crate failure;
 extern crate log;
@@ -13,8 +12,9 @@ use crate::db::{Column, Table};
 use log::LevelFilter;
 use oxidb_core::{
     types::{ColumnValue, DataType},
-    ColumnInfo, TableOps,
+    ColumnInfo,
 };
+use oxidb_storage::StorageOps;
 use prettytable::{Cell, Row};
 use simplelog::{CombinedLogger, Config, TermLogger};
 use std::{
@@ -39,7 +39,7 @@ impl Statement {
         match self.stmt_type {
             StatementType::Insert => {
                 for row in &self.new_rows {
-                    table.insert(row.into_iter().cloned())?;
+                    table.insert_row(row.into_iter().cloned())?;
                 }
 
                 Ok(())

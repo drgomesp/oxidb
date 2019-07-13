@@ -1,3 +1,5 @@
+#![feature(box_syntax)]
+
 #[macro_use]
 extern crate bitflags;
 extern crate failure;
@@ -7,19 +9,17 @@ extern crate oxidb_core;
 pub mod babylon;
 
 use failure::Error;
+use oxidb_core::ColumnValueOps;
 use std::borrow::Cow;
 
-pub trait PageInfo {
-    fn get_free_space(&self) -> usize;
-    fn get_page_size(&self) -> usize;
-    fn get_row_count(&self) -> usize;
-}
+pub trait StorageOps<'a> {
+    type ColumnValue: ColumnValueOps;
 
-pub trait PageOps {
-    type ColumnValue: Clone;
+    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
+    where
+        [<Self as StorageOps<'a>>::ColumnValue]: std::borrow::ToOwned;
 
-    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>;
-    fn insert<T>(&mut self, row: T) -> Result<(), Error>
+    fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>;

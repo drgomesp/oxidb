@@ -1,5 +1,6 @@
 use crate::{
-    db::{ColumnInfo, ColumnValueOps, PageInfo, PageOps},
+    db::{ColumnInfo, ColumnValueOps},
+    storage::{PageInfo, PageOps},
     types::{column_value::ColumnValue, DataType},
 };
 use failure::Error;

@@ -159,29 +159,3 @@ impl<'a> TableOps<'a> for Table<'a> {
         Ok(())
     }
 }
-
-fn build_row_data<I>(values: I) -> Vec<Box<[u8]>>
-where
-    I: ExactSizeIterator,
-    I: Iterator<Item = ColumnValue>,
-{
-    values
-        .map(|ref value| match value {
-            ColumnValue::StringLiteral(ref s) => {
-                value.to_bytes(&DataType::String(s.len())).unwrap()
-            }
-            ColumnValue::SignedInteger(..) => value
-                .to_bytes(&DataType::Integer {
-                    bytes: 8,
-                    signed: true,
-                })
-                .unwrap(),
-            ColumnValue::UnsignedInteger(..) => value
-                .to_bytes(&DataType::Integer {
-                    bytes: 8,
-                    signed: false,
-                })
-                .unwrap(),
-        })
-        .collect()
-}

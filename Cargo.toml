@@ -7,7 +7,17 @@ edition = "2018"
 [profile.release]
 debug = true
 
+[features]
+default = ["core"]
+
+core = [
+    "oxidb_core",
+    "oxidb_storage"
+]
+
 [dependencies]
+oxidb_core = { path = "oxidb_core", optional=true }
+oxidb_storage = { path = "oxidb_storage", optional=true }
 log = "*"
 simplelog = "*"
 byteorder = "*"

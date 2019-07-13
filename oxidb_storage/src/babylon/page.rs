@@ -1,10 +1,8 @@
-use crate::{
-    db::{ColumnInfo, ColumnValueOps},
-    storage::{PageInfo, PageOps},
-    types::{ColumnValue, DataType},
-};
+use crate::{PageInfo, PageOps};
 use failure::Error;
 use log::debug;
+use oxidb_core::types::ColumnValue;
+use oxidb_core::{ColumnInfo, ColumnValueOps};
 use std::borrow::Cow;
 use std::mem;
 
@@ -13,7 +11,7 @@ pub(crate) const PAGE_HEADER_SIZE: usize = mem::size_of::<PageHeader>();
 
 bitflags!(
   #[derive(Default)]
-  pub(crate) struct PageFlags: u8 {
+  pub struct PageFlags: u8 {
     const EMPTY = 0b_1000_0000;
     const FULL  = 0b_0100_0000;
   }
@@ -22,7 +20,7 @@ bitflags!(
 type RowPointer = (u16, u16);
 
 #[derive(Clone, Debug)]
-pub(crate) struct PageHeader {
+pub struct PageHeader {
     pub page_size: usize,
     pub row_count: usize,
     pub flags: PageFlags,
@@ -30,7 +28,7 @@ pub(crate) struct PageHeader {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct Page<'a> {
+pub struct Page<'a> {
     pub header: PageHeader,
     columns: &'a [Box<dyn ColumnInfo>],
     offsets: Vec<RowPointer>,

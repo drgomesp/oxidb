@@ -1,0 +1,13 @@
+[package]
+name = "oxidb_storage"
+version = "0.1.0"
+authors = ["Daniel Ribeiro <drgomesp@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+oxidb_core = { path = "./../oxidb_core" }
+byteorder = "*"
+failure = "*"
+log = "*"
+simplelog = "*"
+bitflags = "*"

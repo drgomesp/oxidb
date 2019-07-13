@@ -8,16 +8,14 @@ extern crate failure;
 extern crate log;
 
 mod db;
-mod simple_db;
-mod storage;
-mod types;
 
-use crate::db::ColumnInfo;
-use crate::types::{ColumnValue, DataType};
-use db::TableOps;
+use crate::db::{Column, Table};
 use log::LevelFilter;
+use oxidb_core::{
+    types::{ColumnValue, DataType},
+    ColumnInfo, TableOps,
+};
 use prettytable::{Cell, Row};
-use simple_db::{Column, Table};
 use simplelog::{CombinedLogger, Config, TermLogger};
 use std::{
     io::{stdin, stdout, Write},

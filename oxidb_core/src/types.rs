@@ -1,4 +1,4 @@
-use crate::db::ColumnValueOps;
+use super::ColumnValueOps;
 use byteorder::{ByteOrder, LittleEndian};
 use failure::Error;
 use std::borrow::Cow;
@@ -20,7 +20,7 @@ impl DataType {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) enum ColumnValue {
+pub enum ColumnValue {
     StringLiteral(String),
     UnsignedInteger(u64),
     SignedInteger(i64),

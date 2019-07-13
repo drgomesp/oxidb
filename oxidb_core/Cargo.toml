@@ -1,0 +1,9 @@
+[package]
+name = "oxidb_core"
+version = "0.1.0"
+authors = ["Daniel Ribeiro <drgomesp@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+byteorder = "*"
+failure = "*"

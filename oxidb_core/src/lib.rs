@@ -2,8 +2,7 @@ pub mod types;
 
 use crate::types::DataType;
 use failure::Error;
-use std::borrow::Cow;
-use std::fmt::Debug;
+use std::{borrow::Cow, fmt::Debug};
 
 pub trait ColumnValueOps: Sized {
     type ColumnType;

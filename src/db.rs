@@ -3,13 +3,8 @@ use oxidb_core::{
     types::{ColumnValue, DataType},
     ColumnInfo,
 };
-use oxidb_storage::{
-    babylon::{page::Page, PageOps},
-    StorageOps,
-};
+use oxidb_storage::StorageOps;
 use std::borrow::Cow;
-
-pub(crate) const MAX_PAGES: u8 = 100;
 
 #[derive(Clone, Debug)]
 pub struct Column {
@@ -19,10 +14,10 @@ pub struct Column {
 }
 
 impl Column {
-    pub fn new(name: String, value_type: DataType, nullable: bool) -> Self {
+    pub fn new(name: String, data_type: DataType, nullable: bool) -> Self {
         Self {
             name,
-            data_type: value_type,
+            data_type,
             nullable,
         }
     }
@@ -32,7 +27,6 @@ impl ColumnInfo for Column {
     fn get_name(&self) -> &str {
         self.name.as_str()
     }
-
     fn get_data_type(&self) -> &DataType {
         &self.data_type
     }
@@ -42,7 +36,6 @@ impl ColumnInfo for Column {
 pub struct Table<'a> {
     name: String,
     pub columns: &'a [Box<dyn ColumnInfo>],
-    pages: Box<[Page<'a>]>,
     num_rows: u64,
 }
 
@@ -51,7 +44,6 @@ impl<'a> Table<'a> {
         Self {
             name,
             columns,
-            pages: vec![Page::new(&columns); MAX_PAGES as usize].into_boxed_slice(),
             num_rows: 0,
         }
     }
@@ -64,19 +56,14 @@ impl<'a> StorageOps<'a> for Table<'a> {
     where
         [<Self as StorageOps<'a>>::ColumnValue]: std::borrow::ToOwned,
     {
-        self.pages[0].iter()
+        unimplemented!();
     }
 
-    fn insert_row<T>(&mut self, column_data: T) -> Result<(), Error>
+    fn insert_row<T>(&mut self, _: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>,
     {
-        let boxed_page = &mut self.pages[0];
-        boxed_page.insert(column_data)?;
-
-        self.num_rows += 1;
-
-        Ok(())
+        unimplemented!()
     }
 }

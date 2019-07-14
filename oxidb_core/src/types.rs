@@ -1,8 +1,7 @@
-use super::ColumnValueOps;
+use crate::ColumnValueOps;
 use byteorder::{ByteOrder, LittleEndian};
 use failure::Error;
-use std::borrow::Cow;
-use std::fmt;
+use std::{borrow::Cow, fmt};
 
 #[derive(Clone, Debug)]
 pub enum DataType {

@@ -39,7 +39,7 @@ impl Statement {
         match self.stmt_type {
             StatementType::Insert => {
                 for row in &self.new_rows {
-                    table.insert_row(row.into_iter().cloned())?;
+                    table.insert_row(row.iter().cloned())?;
                 }
 
                 Ok(())

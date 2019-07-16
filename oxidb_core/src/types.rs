@@ -1,15 +1,26 @@
-use crate::ColumnValueOps;
+use super::ColumnValueOps;
 use byteorder::{ByteOrder, LittleEndian};
 use failure::Error;
 use std::{borrow::Cow, fmt};
 
-#[derive(Clone, Debug)]
+/// `DataType` defines the core supported types of the database system.
+#[derive(Copy, Clone, Debug)]
 pub enum DataType {
+    /// A variable-length character string.
     String(usize),
-    Integer { signed: bool, bytes: u8 },
+
+    /// Signed or unsigned [8-64]-bit integer.
+    Integer {
+        /// Signed or unsigned.
+        signed: bool,
+
+        /// [8-64]-bit integer.
+        bytes: u8,
+    },
 }
 
 impl DataType {
+    /// Get the optional fixed length of the data type.
     pub fn get_fixed_length(&self) -> Option<usize> {
         match self {
             DataType::String(length) => Some(*length),
@@ -18,10 +29,17 @@ impl DataType {
     }
 }
 
+/// `ColumnValue` is an interpretation the database supported types as meaningful column value
+/// enumerations. Each item holds its inner value, each one with their own specific types.
 #[derive(Clone, Debug)]
 pub enum ColumnValue {
+    /// `StringLiteral` holds a `String`.
     StringLiteral(String),
+
+    /// `UnsignedInteger(u64)` holds a `u64`
     UnsignedInteger(u64),
+
+    /// `SignedInteger(i64)` holds a `i64`
     SignedInteger(i64),
 }
 

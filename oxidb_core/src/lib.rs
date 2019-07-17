@@ -21,7 +21,7 @@ pub mod types;
 
 use crate::types::DataType;
 use failure::Error;
-use std::{borrow::Cow, fmt::Debug};
+use std::borrow::Cow;
 
 /// `ColumnValueOps` defines column operations.
 pub trait ColumnValueOps: Sized {
@@ -33,13 +33,4 @@ pub trait ColumnValueOps: Sized {
 
     /// Serialize `Self` into byte slice for a given `Self::ColumnType`.
     fn to_bytes(&self, column_type: &Self::ColumnType) -> Result<Box<[u8]>, Error>;
-}
-
-/// `ColumnInfo` exposes column info.
-pub trait ColumnInfo: Debug {
-    /// Returns the column name.
-    fn get_name(&self) -> &str;
-
-    /// Returns the column's `DataType`.
-    fn get_data_type(&self) -> &DataType;
 }

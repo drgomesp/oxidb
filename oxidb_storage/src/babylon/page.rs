@@ -1,6 +1,8 @@
 use failure::Error;
 use log::debug;
-use oxidb_core::{types::ColumnValue, ColumnInfo, ColumnValueOps};
+use oxidb_core::types::DataType;
+use oxidb_core::{types::ColumnValue, ColumnValueOps};
+use oxidb_schema::ColumnInfo;
 use std::{borrow::Cow, mem};
 
 const PAGE_SIZE: usize = 4096;

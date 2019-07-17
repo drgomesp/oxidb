@@ -1,4 +1,5 @@
-use oxidb_core::{types::DataType, ColumnInfo};
+use oxidb_core::types::DataType;
+use oxidb_schema::ColumnInfo;
 
 #[derive(Clone, Debug)]
 pub struct Column {

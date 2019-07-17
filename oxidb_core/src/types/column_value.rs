@@ -1,4 +1,4 @@
-use crate::{types::data_type::DataType, ColumnValueOps};
+use crate::{types::DataType, ColumnValueOps};
 use byteorder::{ByteOrder, LittleEndian};
 use failure::Error;
 use std::borrow::ToOwned;

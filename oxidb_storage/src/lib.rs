@@ -21,6 +21,7 @@ extern crate bitflags;
 extern crate failure;
 extern crate log;
 extern crate oxidb_core;
+extern crate oxidb_schema;
 
 /// `babylon` is `oxidb`'s default storage engine.
 pub mod babylon;

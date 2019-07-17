@@ -1,14 +1,10 @@
 [package]
-name = "oxidb_storage"
+name = "oxidb_schema"
 version = "0.1.0"
 authors = ["Daniel Ribeiro <drgomesp@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 oxidb_core = { path = "./../oxidb_core" }
-oxidb_schema = { path = "./../oxidb_schema" }
 byteorder = "*"
 failure = "*"
-log = "*"
-simplelog = "*"
-bitflags = "*"

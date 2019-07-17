@@ -1,6 +1,7 @@
 use crate::StorageOps;
 use failure::Error;
-use oxidb_core::{types::ColumnValue, ColumnInfo};
+use oxidb_core::types::ColumnValue;
+use oxidb_schema::ColumnInfo;
 use std::borrow::Cow;
 
 #[derive(Debug)]

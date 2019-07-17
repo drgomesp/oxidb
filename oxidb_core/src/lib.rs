@@ -16,12 +16,14 @@
 //! ## Examples
 //!
 
-/// `types` groups the basic core supported types and default implementations.
-pub mod types;
+use std::borrow::Cow;
+
+use failure::Error;
 
 use crate::types::DataType;
-use failure::Error;
-use std::borrow::Cow;
+
+/// `types` groups the basic core supported types and default implementations.
+pub mod types;
 
 /// `ColumnValueOps` defines column operations.
 pub trait ColumnValueOps: Sized {

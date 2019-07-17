@@ -121,6 +121,10 @@ impl<'a> Page<'a> {
 
 #[cfg(test)]
 mod tests {
+    use oxidb_core::types::DataType;
+
+    use super::*;
+
     #[derive(Debug)]
     struct Column {
         pub name: String,
@@ -144,9 +148,6 @@ mod tests {
             &self.data_type
         }
     }
-
-    use super::*;
-    use oxidb_core::types::DataType;
 
     #[test]
     fn test_page_default() {

@@ -16,8 +16,9 @@
 //! ## Examples
 //!
 
-use oxidb_core::types::DataType;
 use std::fmt::Debug;
+
+use oxidb_core::types::DataType;
 
 /// `ColumnInfo` exposes column info.
 pub trait ColumnInfo: Debug {

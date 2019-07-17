@@ -1,8 +1,10 @@
-use crate::{types::DataType, ColumnValueOps};
-use byteorder::{ByteOrder, LittleEndian};
-use failure::Error;
 use std::borrow::ToOwned;
 use std::{borrow::Cow, fmt};
+
+use byteorder::{ByteOrder, LittleEndian};
+use failure::Error;
+
+use crate::{types::DataType, ColumnValueOps};
 
 /// `ColumnValue` is an interpretation the database supported types as meaningful column value
 /// enumerations. Each item holds its inner value, each one with their own specific types.

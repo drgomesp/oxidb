@@ -23,12 +23,13 @@ extern crate log;
 extern crate oxidb_core;
 extern crate oxidb_schema;
 
-/// `babylon` is `oxidb`'s default storage engine.
-pub mod babylon;
+use std::borrow::Cow;
 
 use failure::Error;
 use oxidb_core::ColumnValueOps;
-use std::borrow::Cow;
+
+mod babylon;
+/// `babylon` is `oxidb`'s default storage engine.
 
 /// `StorageOps` define the basic interface of storage engines.
 pub trait StorageOps<'a> {
@@ -38,7 +39,7 @@ pub trait StorageOps<'a> {
     /// `iter` Returns an iterator over rows as arrays of `Self::ColumnValue` type items.
     fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
     where
-        [<Self as StorageOps<'a>>::ColumnValue]: std::borrow::ToOwned;
+        [Self::ColumnValue]: std::borrow::ToOwned;
 
     /// `insert_row` inserts a new row.
     fn insert_row<T>(&mut self, row: T) -> Result<(), Error>

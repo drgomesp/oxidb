@@ -1,8 +1,9 @@
+use std::borrow::Cow;
+
 use crate::StorageOps;
 use failure::Error;
 use oxidb_core::types::ColumnValue;
 use oxidb_schema::ColumnInfo;
-use std::borrow::Cow;
 
 #[derive(Debug)]
 pub struct Table<'a> {

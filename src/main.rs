@@ -1,24 +1,26 @@
 #![feature(box_syntax)]
 
-#[macro_use]
-extern crate prettytable;
 extern crate bitflags;
 extern crate failure;
 extern crate log;
+#[macro_use]
+extern crate prettytable;
 
-mod db;
+use std::{
+    io::{stdin, stdout, Write},
+    str::FromStr,
+};
 
-use crate::db::{Column, Table};
 use log::LevelFilter;
 use oxidb_core::types::{ColumnValue, DataType};
 use oxidb_schema::ColumnInfo;
 use oxidb_storage::StorageOps;
 use prettytable::{Cell, Row};
 use simplelog::{CombinedLogger, Config, TermLogger};
-use std::{
-    io::{stdin, stdout, Write},
-    str::FromStr,
-};
+
+use crate::db::{Column, Table};
+
+mod db;
 
 #[derive(Debug)]
 enum StatementType {
@@ -81,10 +83,7 @@ fn read_stdin() -> String {
     input.trim().into()
 }
 
-fn prepare_statement<'a>(
-    stmt_type: StatementType,
-    input: String,
-) -> Result<Statement, failure::Error> {
+fn prepare_statement(stmt_type: StatementType, input: String) -> Result<Statement, failure::Error> {
     let column_values: Vec<&str> = input.split(' ').collect();
     let mut row = vec![];
 

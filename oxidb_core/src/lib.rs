@@ -19,7 +19,7 @@
 /// `types` groups the basic core supported types and default implementations.
 pub mod types;
 
-use self::types::DataType;
+use crate::types::DataType;
 use failure::Error;
 use std::{borrow::Cow, fmt::Debug};
 

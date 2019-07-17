@@ -10,10 +10,8 @@ mod db;
 
 use crate::db::{Column, Table};
 use log::LevelFilter;
-use oxidb_core::{
-    types::{ColumnValue, DataType},
-    ColumnInfo,
-};
+use oxidb_core::types::{ColumnValue, DataType};
+use oxidb_schema::ColumnInfo;
 use oxidb_storage::StorageOps;
 use prettytable::{Cell, Row};
 use simplelog::{CombinedLogger, Config, TermLogger};

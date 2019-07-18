@@ -20,13 +20,11 @@ use std::borrow::Cow;
 
 use failure::Error;
 
-use crate::types::DataType;
-
 /// `types` groups the basic core supported types and default implementations.
 pub mod types;
 
 /// `ColumnValueOps` defines column operations.
-pub trait ColumnValueOps: Sized {
+pub trait ColumnValueOps: Sized + Clone + Eq {
     /// ColumnType is the actual column type implemented by the database layer.
     type ColumnType: Copy + Clone + Sized;
 

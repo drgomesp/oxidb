@@ -31,8 +31,8 @@ use oxidb_core::ColumnValueOps;
 /// `babylon` is `oxidb`'s default storage engine.
 pub mod babylon;
 
-/// `StorageOps` define the basic interface of storage engines.
-pub trait StorageOps<'a> {
+/// `ReadOps` define the basic read-only interface for a storage engine.
+pub trait ReadOps<'a> {
     /// `ColumnValue` implementation of `ColumnValueOps`
     type ColumnValue: ColumnValueOps;
 
@@ -40,6 +40,12 @@ pub trait StorageOps<'a> {
     fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
     where
         [Self::ColumnValue]: std::borrow::ToOwned;
+}
+
+/// `WriteOps` define the basic write-only interface for a storage engine.
+pub trait WriteOps<'a> {
+    /// `ColumnValue` implementation of `ColumnValueOps`
+    type ColumnValue: ColumnValueOps;
 
     /// `insert_row` inserts a new row.
     fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
@@ -51,7 +57,7 @@ pub trait StorageOps<'a> {
 /// `StorageFactory` defines the interface to build the storage engine.
 pub trait StorageFactory<'a> {
     /// The `StorageOps` implementation.
-    type Storage: StorageOps<'a>;
+    type Storage: WriteOps<'a>;
 
     /// `build` a new storage engine instance.
     fn build() -> Result<Self::Storage, Error>;

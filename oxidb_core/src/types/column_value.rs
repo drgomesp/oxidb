@@ -8,7 +8,7 @@ use crate::{types::DataType, ColumnValueOps};
 
 /// `ColumnValue` is an interpretation the database supported types as meaningful column value
 /// enumerations. Each item holds its inner value, each one with their own specific types.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum ColumnValue {
     /// `StringLiteral` holds a `String`.
     StringLiteral(String),

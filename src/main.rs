@@ -12,9 +12,9 @@ use std::{
 };
 
 use log::LevelFilter;
-use oxidb_core::types::{ColumnValue, DataType};
+use oxidb_core::types::ColumnValue;
 use oxidb_storage::babylon::BabylonStorage;
-use oxidb_storage::{StorageFactory, StorageOps};
+use oxidb_storage::{ReadOps, StorageFactory, WriteOps};
 use prettytable::{Cell, Row};
 use simplelog::{CombinedLogger, Config, TermLogger};
 

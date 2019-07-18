@@ -1,25 +1,29 @@
-use crate::babylon::column::Column;
+use std::mem;
+
 use failure::Error;
 use log::debug;
-use oxidb_core::types::DataType;
 use oxidb_core::{types::ColumnValue, ColumnValueOps};
 use oxidb_schema::ColumnInfo;
-use std::{borrow::Cow, mem};
+
+use crate::babylon::column::Column;
+use crate::WriteOps;
 
 const PAGE_SIZE: usize = 4096;
 const PAGE_HEADER_SIZE: usize = mem::size_of::<PageHeader>();
+const PAGE_INITIAL_FREE_SIZE: usize = PAGE_SIZE - PAGE_HEADER_SIZE;
 
 bitflags!(
   #[derive(Default)]
   pub struct PageFlags: u8 {
-    const EMPTY = 0b_1000_0000;
-    const FULL  = 0b_0100_0000;
+    const DIRTY = 0b_1000_0000;
+    const EMPTY = 0b_0100_0000;
+    const FULL  = 0b_0010_0000;
   }
 );
 
 type RowPointer = (u16, u16);
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct PageHeader {
     pub page_size: usize,
     pub row_count: usize,
@@ -28,66 +32,55 @@ pub struct PageHeader {
 }
 
 #[derive(Clone, Debug)]
-pub struct Page<'a> {
+pub struct Page {
     pub header: PageHeader,
-    columns: &'a Vec<Column>,
-    offsets: Vec<RowPointer>,
-    data: Vec<u8>,
+    pub offsets: Vec<RowPointer>,
+    pub data: Vec<u8>,
 }
 
-impl<'a> Page<'a> {
-    pub fn new(columns: &'a Vec<Column>) -> Self {
+impl Default for Page {
+    fn default() -> Self {
         Self {
             header: PageHeader {
                 page_size: PAGE_SIZE,
                 row_count: 0,
-                flags: PageFlags::default(),
-                free_space: PAGE_SIZE - PAGE_HEADER_SIZE,
+                flags: PageFlags::DIRTY,
+                free_space: PAGE_INITIAL_FREE_SIZE,
             },
-            columns,
             offsets: vec![],
             data: vec![],
         }
     }
 }
 
-impl<'a> Page<'a> {
-    pub fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [ColumnValue]>> + 'b> {
-        let (mut row_num, mut column_offset) = (0, 0);
-
-        Box::new(self.offsets.iter().map(move |(offset, _)| {
-            column_offset = *offset as usize;
-
-            let row: Vec<ColumnValue> = self
-                .columns
-                .iter()
-                .map(|column| {
-                    let size = column.get_data_type().get_fixed_length().unwrap();
-                    let bytes = &self.data[column_offset..column_offset + size];
-
-                    let v = ColumnValueOps::from_bytes(column.get_data_type(), Cow::from(bytes))
-                        .expect("could not create column value ops from bytes");
-
-                    column_offset += size;
-
-                    v
-                })
-                .collect();
-
-            row_num += 1;
-
-            Cow::from(row)
-        }))
+impl Page {
+    pub fn new() -> Self {
+        Self {
+            header: PageHeader {
+                page_size: PAGE_SIZE,
+                row_count: 0,
+                flags: PageFlags::default(),
+                free_space: PAGE_INITIAL_FREE_SIZE,
+            },
+            offsets: vec![],
+            data: vec![],
+        }
     }
+}
 
-    pub fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
+impl<'a> WriteOps<'a> for (&Vec<Column>, &mut Page) {
+    type ColumnValue = ColumnValue;
+
+    fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = ColumnValue>,
     {
+        let (columns, page) = self;
+
         let mut row_size: usize = 0;
 
-        for (column, cv) in self.columns.iter().zip(row) {
+        for (column, cv) in columns.iter().zip(row) {
             let data_box = cv.to_bytes(column.get_data_type())?;
 
             match column.get_data_type().get_fixed_length() {
@@ -98,23 +91,23 @@ impl<'a> Page<'a> {
             let column_length = column.get_data_type().get_fixed_length().expect("wtf");
             let remaining = vec![0u8; column_length - data_box.len()];
 
-            self.data.extend_from_slice(&data_box);
-            self.data.extend_from_slice(&remaining);
+            page.data.extend_from_slice(&data_box);
+            page.data.extend_from_slice(&remaining);
         }
 
-        if self.header.free_space < row_size {
+        if page.header.free_space < row_size {
             panic!("not enough space in page")
         }
 
-        self.offsets.push((
-            self.header.row_count as u16 * row_size as u16,
+        page.offsets.push((
+            page.header.row_count as u16 * row_size as u16,
             row_size as u16,
         ));
 
-        self.header.row_count += 1;
-        self.header.free_space -= row_size + mem::size_of::<RowPointer>();
+        page.header.row_count += 1;
+        page.header.free_space -= row_size + mem::size_of::<RowPointer>();
 
-        debug!("page={:#?}\n", self);
+        debug!("page={:#?}\n", page);
 
         Ok(())
     }

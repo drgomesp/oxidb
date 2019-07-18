@@ -1,10 +1,8 @@
 use crate::babylon::column::Column;
 use crate::babylon::table::Table;
-use crate::{StorageFactory, StorageOps};
+use crate::{ReadOps, StorageFactory, WriteOps};
 use failure::Error;
 use oxidb_core::types::{ColumnValue, DataType};
-use oxidb_core::ColumnValueOps;
-use oxidb_schema::ColumnInfo;
 use std::borrow::Cow;
 
 mod column;
@@ -34,7 +32,7 @@ impl<'a> StorageFactory<'a> for BabylonStorage {
             Column::new(String::from("last_name"), DataType::String(8), true),
         ];
 
-        let mut table = Table::new(String::from("users"), columns);
+        let table = Table::new(String::from("users"), columns);
 
         Ok(BabylonStorage {
             tables: vec![table],
@@ -42,22 +40,31 @@ impl<'a> StorageFactory<'a> for BabylonStorage {
     }
 }
 
-impl<'a> StorageOps<'a> for BabylonStorage {
+impl<'a> ReadOps<'a> for BabylonStorage {
     type ColumnValue = ColumnValue;
 
-    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<[Self::ColumnValue]>>>
+    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
     where
         [Self::ColumnValue]: std::borrow::ToOwned,
     {
-        unimplemented!()
+        self.tables
+            .first()
+            .expect("could not get first table")
+            .iter()
     }
+}
+
+impl<'a> WriteOps<'a> for BabylonStorage {
+    type ColumnValue = ColumnValue;
 
     fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>,
     {
-        let mut table = self.tables.first_mut().expect("could not get first table");
-        table.insert_row(row)
+        self.tables
+            .first_mut()
+            .expect("could not get first table")
+            .insert_row(row)
     }
 }

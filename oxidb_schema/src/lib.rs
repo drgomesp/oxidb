@@ -21,7 +21,7 @@ use std::fmt::Debug;
 use oxidb_core::types::DataType;
 
 /// `ColumnInfo` exposes column info.
-pub trait ColumnInfo: Debug {
+pub trait ColumnInfo: Debug + Sized {
     /// Returns the column name.
     fn get_name(&self) -> &str;
 

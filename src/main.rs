@@ -13,14 +13,10 @@ use std::{
 
 use log::LevelFilter;
 use oxidb_core::types::{ColumnValue, DataType};
-use oxidb_schema::ColumnInfo;
-use oxidb_storage::StorageOps;
+use oxidb_storage::babylon::BabylonStorage;
+use oxidb_storage::{StorageFactory, StorageOps};
 use prettytable::{Cell, Row};
 use simplelog::{CombinedLogger, Config, TermLogger};
-
-use crate::db::{Column, Table};
-
-mod db;
 
 #[derive(Debug)]
 enum StatementType {
@@ -35,11 +31,11 @@ struct Statement {
 }
 
 impl Statement {
-    fn execute(&self, table: &mut Table) -> Result<(), failure::Error> {
+    fn execute(&self, storage: &mut BabylonStorage) -> Result<(), failure::Error> {
         match self.stmt_type {
             StatementType::Insert => {
                 for row in &self.new_rows {
-                    table.insert_row(row.iter().cloned())?;
+                    storage.insert_row(row.iter().cloned())?;
                 }
 
                 Ok(())
@@ -48,10 +44,10 @@ impl Statement {
                 let mut t = prettytable::Table::new();
                 t.set_titles(row![cell!("ID"), cell!("FIRST NAME"), cell!("LAST NAME")]);
 
-                for row in table.iter() {
+                for row in storage.iter() {
                     let mut tcv = vec![];
 
-                    for (_, cv) in table.columns.iter().zip(row.iter()) {
+                    for cv in row.iter() {
                         tcv.push(Cell::new(format!("{:?}", cv).as_str()));
                     }
 
@@ -106,20 +102,7 @@ fn main() {
     ])
     .unwrap();
 
-    let columns: Vec<Box<dyn ColumnInfo>> = vec![
-        box Column::new(
-            String::from("id"),
-            DataType::Integer {
-                bytes: 8,
-                signed: false,
-            },
-            true,
-        ),
-        box Column::new(String::from("first_name"), DataType::String(8), true),
-        box Column::new(String::from("last_name"), DataType::String(8), true),
-    ];
-
-    let mut table = Table::new(String::from("users"), &columns);
+    let mut storage = BabylonStorage::build().expect("could not build storage engine");
 
     loop {
         print!("oxidb> ");
@@ -133,6 +116,6 @@ fn main() {
             read_stdin(),
         );
 
-        stmt.unwrap().execute(&mut table).unwrap()
+        stmt.unwrap().execute(&mut storage);
     }
 }

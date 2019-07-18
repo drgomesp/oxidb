@@ -1,3 +1,4 @@
+use crate::babylon::column::Column;
 use failure::Error;
 use log::debug;
 use oxidb_core::types::DataType;
@@ -29,13 +30,13 @@ pub struct PageHeader {
 #[derive(Clone, Debug)]
 pub struct Page<'a> {
     pub header: PageHeader,
-    columns: &'a [Box<dyn ColumnInfo>],
+    columns: &'a Vec<Column>,
     offsets: Vec<RowPointer>,
     data: Vec<u8>,
 }
 
 impl<'a> Page<'a> {
-    pub fn new(columns: &'a [Box<dyn ColumnInfo>]) -> Self {
+    pub fn new(columns: &'a Vec<Column>) -> Self {
         Self {
             header: PageHeader {
                 page_size: PAGE_SIZE,
@@ -51,7 +52,7 @@ impl<'a> Page<'a> {
 }
 
 impl<'a> Page<'a> {
-    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [ColumnValue]>> + 'b> {
+    pub fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [ColumnValue]>> + 'b> {
         let (mut row_num, mut column_offset) = (0, 0);
 
         Box::new(self.offsets.iter().map(move |(offset, _)| {
@@ -79,7 +80,7 @@ impl<'a> Page<'a> {
         }))
     }
 
-    fn insert<T>(&mut self, row: T) -> Result<(), Error>
+    pub fn insert<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = ColumnValue>,

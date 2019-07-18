@@ -28,8 +28,8 @@ use std::borrow::Cow;
 use failure::Error;
 use oxidb_core::ColumnValueOps;
 
-mod babylon;
 /// `babylon` is `oxidb`'s default storage engine.
+pub mod babylon;
 
 /// `StorageOps` define the basic interface of storage engines.
 pub trait StorageOps<'a> {
@@ -46,4 +46,13 @@ pub trait StorageOps<'a> {
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>;
+}
+
+/// `StorageFactory` defines the interface to build the storage engine.
+pub trait StorageFactory<'a> {
+    /// The `StorageOps` implementation.
+    type Storage: StorageOps<'a>;
+
+    /// `build` a new storage engine instance.
+    fn build() -> Result<Self::Storage, Error>;
 }

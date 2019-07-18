@@ -28,7 +28,7 @@ pub mod types;
 /// `ColumnValueOps` defines column operations.
 pub trait ColumnValueOps: Sized {
     /// ColumnType is the actual column type implemented by the database layer.
-    type ColumnType: Copy + Clone;
+    type ColumnType: Copy + Clone + Sized;
 
     /// Deserialize `bytes` into `Self` for a given `Self::ColumnType`.
     fn from_bytes(column_type: &Self::ColumnType, bytes: Cow<[u8]>) -> Result<Self, Error>;

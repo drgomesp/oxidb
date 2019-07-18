@@ -45,7 +45,7 @@ impl<'a> StorageFactory<'a> for BabylonStorage {
 impl<'a> StorageOps<'a> for BabylonStorage {
     type ColumnValue = ColumnValue;
 
-    fn iter<'b>(&'b self) -> Box<Iterator<Item = Cow<[Self::ColumnValue]>>>
+    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<[Self::ColumnValue]>>>
     where
         [Self::ColumnValue]: std::borrow::ToOwned,
     {

@@ -80,7 +80,7 @@ impl<'a> Page<'a> {
         }))
     }
 
-    pub fn insert<T>(&mut self, row: T) -> Result<(), Error>
+    pub fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = ColumnValue>,
@@ -127,12 +127,12 @@ mod tests {
     use super::*;
 
     #[derive(Debug)]
-    struct Column {
+    struct SomeColumn {
         pub name: String,
         pub data_type: DataType,
     }
 
-    impl Column {
+    impl SomeColumn {
         pub fn new(name: String, value_type: DataType) -> Self {
             Self {
                 name,
@@ -141,7 +141,7 @@ mod tests {
         }
     }
 
-    impl ColumnInfo for Column {
+    impl ColumnInfo for SomeColumn {
         fn get_name(&self) -> &str {
             self.name.as_str()
         }
@@ -161,22 +161,24 @@ mod tests {
 
     #[test]
     fn test_page_insert() {
-        let columns: Vec<Box<dyn ColumnInfo>> = vec![
-            Box::new(Column::new(
+        let columns: Vec<Column> = vec![
+            Column::new(
                 "uint".to_string(),
                 DataType::Integer {
                     bytes: 8,
                     signed: false,
                 },
-            )),
-            Box::new(Column::new(
+                false,
+            ),
+            Column::new(
                 "int".to_string(),
                 DataType::Integer {
                     bytes: 8,
                     signed: true,
                 },
-            )),
-            Box::new(Column::new("string".to_string(), DataType::String(8))),
+                false,
+            ),
+            Column::new("string".to_string(), DataType::String(8), false),
         ];
 
         let mut page = Page::new(&columns);
@@ -195,7 +197,7 @@ mod tests {
         let rows: Vec<Vec<ColumnValue>> = vec![cvs.clone(); 3];
 
         for r in &rows {
-            assert!(page.insert(r.into_iter().cloned()).is_ok());
+            assert!(page.insert_row(r.into_iter().cloned()).is_ok());
         }
 
         let row_size = 8 + 8 + 8;

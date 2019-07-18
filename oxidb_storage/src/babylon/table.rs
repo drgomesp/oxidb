@@ -40,7 +40,7 @@ impl<'a> StorageOps<'a> for Table {
         T: Iterator<Item = Self::ColumnValue>,
     {
         let mut page = Page::new(&self.columns);
-        page.insert(row);
+        page.insert_row(row);
 
         Ok(())
     }

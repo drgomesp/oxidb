@@ -71,7 +71,7 @@ impl Page {
 impl<'a> WriteOps<'a> for (&Vec<Column>, &mut Page) {
     type ColumnValue = ColumnValue;
 
-    fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
+    fn insert<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = ColumnValue>,

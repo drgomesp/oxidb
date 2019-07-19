@@ -89,7 +89,7 @@ impl ColumnValueOps for ColumnValue {
                 LittleEndian::write_i64(&mut buf, *i);
                 Ok(buf.to_owned().into_boxed_slice())
             }
-            _ => unimplemented!(),
+            _ => unimplemented!("{:#?} {:#?}", &self, column_type),
         }
     }
 }

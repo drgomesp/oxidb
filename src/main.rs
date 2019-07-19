@@ -35,7 +35,7 @@ impl Statement {
         match self.stmt_type {
             StatementType::Insert => {
                 for row in &self.new_rows {
-                    storage.insert_row(row.iter().cloned())?;
+                    storage.insert(row.iter().cloned())?;
                 }
 
                 Ok(())

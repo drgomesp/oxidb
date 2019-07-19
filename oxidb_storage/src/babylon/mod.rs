@@ -57,7 +57,7 @@ impl<'a> ReadOps<'a> for BabylonStorage {
 impl<'a> WriteOps<'a> for BabylonStorage {
     type ColumnValue = ColumnValue;
 
-    fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
+    fn insert<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>,
@@ -65,6 +65,6 @@ impl<'a> WriteOps<'a> for BabylonStorage {
         self.tables
             .first_mut()
             .expect("could not get first table")
-            .insert_row(row)
+            .insert(row)
     }
 }

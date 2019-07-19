@@ -70,7 +70,7 @@ impl<'a> ReadOps<'a> for Table {
 impl<'a> WriteOps<'a> for Table {
     type ColumnValue = ColumnValue;
 
-    fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
+    fn insert<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>,
@@ -82,6 +82,6 @@ impl<'a> WriteOps<'a> for Table {
                 .expect("could not get first table page"),
         );
 
-        ops.insert_row(row)
+        ops.insert(row)
     }
 }

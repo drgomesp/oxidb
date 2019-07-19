@@ -48,7 +48,7 @@ pub trait WriteOps<'a> {
     type ColumnValue: ColumnValueOps;
 
     /// `insert_row` inserts a new row.
-    fn insert_row<T>(&mut self, row: T) -> Result<(), Error>
+    fn insert<T>(&mut self, row: T) -> Result<(), Error>
     where
         T: ExactSizeIterator,
         T: Iterator<Item = Self::ColumnValue>;

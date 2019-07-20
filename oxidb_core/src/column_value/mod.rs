@@ -45,7 +45,11 @@ impl ColumnValueOps for ColumnValue {
                 let len = *length;
 
                 if len > 0 {
-                    let s = String::from_utf8_lossy(&bytes[0..len]);
+                    let bytes: Vec<u8> = bytes[0..len]
+                        .iter()
+                        .filter_map(|&x| if x != 0x0 { Some(x) } else { None })
+                        .collect();
+                    let s = String::from_utf8_lossy(&bytes);
                     Ok(ColumnValue::StringLiteral(s.to_string()))
                 } else {
                     unimplemented!()

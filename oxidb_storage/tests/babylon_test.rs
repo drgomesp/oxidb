@@ -11,7 +11,7 @@ mod tests {
     }
 
     #[test]
-    fn test_insert_row() {
+    fn test_insert() {
         let mut storage: BabylonStorage = BabylonStorage::build().unwrap();
 
         let cvs: Vec<_> = "1 foo bar"

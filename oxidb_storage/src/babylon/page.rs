@@ -2,7 +2,7 @@ use std::mem;
 
 use failure::Error;
 use log::debug;
-use oxidb_core::{types::ColumnValue, ColumnValueOps};
+use oxidb_core::{ColumnValue, ColumnValueOps};
 use oxidb_schema::ColumnInfo;
 
 use crate::babylon::column::Column;

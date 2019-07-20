@@ -2,7 +2,7 @@ use crate::babylon::column::Column;
 use crate::babylon::table::Table;
 use crate::{ReadOps, StorageFactory, WriteOps};
 use failure::Error;
-use oxidb_core::types::{ColumnValue, DataType};
+use oxidb_core::{ColumnValue, DataType};
 use std::borrow::Cow;
 
 mod column;
@@ -40,10 +40,10 @@ impl<'a> StorageFactory<'a> for BabylonStorage {
     }
 }
 
-impl<'a> ReadOps<'a> for BabylonStorage {
+impl ReadOps for BabylonStorage {
     type ColumnValue = ColumnValue;
 
-    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
+    fn iter<'a>(&'a self) -> Box<dyn Iterator<Item = Cow<'a, [Self::ColumnValue]>> + 'a>
     where
         [Self::ColumnValue]: std::borrow::ToOwned,
     {

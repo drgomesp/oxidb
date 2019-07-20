@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use failure::Error;
-use oxidb_core::types::ColumnValue;
+use oxidb_core::ColumnValue;
 
 use crate::babylon::{column::Column, page::Page};
 use crate::{ReadOps, WriteOps};
@@ -31,10 +31,10 @@ impl Table {
     }
 }
 
-impl<'a> ReadOps<'a> for Table {
+impl ReadOps for Table {
     type ColumnValue = ColumnValue;
 
-    fn iter<'b>(&'b self) -> Box<dyn Iterator<Item = Cow<'b, [Self::ColumnValue]>> + 'b>
+    fn iter<'a>(&'a self) -> Box<dyn Iterator<Item = Cow<'a, [Self::ColumnValue]>> + 'a>
     where
         [Self::ColumnValue]: std::borrow::ToOwned,
     {

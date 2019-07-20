@@ -6,17 +6,15 @@ extern crate log;
 #[macro_use]
 extern crate prettytable;
 
+use log::LevelFilter;
+use oxidb_core::ColumnValue;
+use oxidb_storage::*;
+use prettytable::{Cell, Row};
+use simplelog::{CombinedLogger, Config, TermLogger};
 use std::{
     io::{stdin, stdout, Write},
     str::FromStr,
 };
-
-use log::LevelFilter;
-use oxidb_core::types::ColumnValue;
-use oxidb_storage::babylon::BabylonStorage;
-use oxidb_storage::{ReadOps, StorageFactory, WriteOps};
-use prettytable::{Cell, Row};
-use simplelog::{CombinedLogger, Config, TermLogger};
 
 #[derive(Debug)]
 enum StatementType {

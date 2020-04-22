@@ -10,7 +10,7 @@ use log::LevelFilter;
 use oxidb_core::ColumnValue;
 use oxidb_storage::*;
 use prettytable::{Cell, Row};
-use simplelog::{CombinedLogger, Config, TermLogger};
+use simplelog::{CombinedLogger, Config, TermLogger, TerminalMode};
 use std::{
     io::{stdin, stdout, Write},
     str::FromStr,
@@ -95,9 +95,12 @@ fn prepare_statement(stmt_type: StatementType, input: String) -> Result<Statemen
 }
 
 fn main() {
-    CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Debug, Config::default()).unwrap()
-    ])
+    CombinedLogger::init(vec![TermLogger::new(
+        LevelFilter::Debug,
+        Config::default(),
+        TerminalMode::Mixed,
+    )
+    .unwrap()])
     .unwrap();
 
     let mut storage = BabylonStorage::build().expect("could not build storage engine");
